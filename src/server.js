@@ -21,7 +21,7 @@ const allowedOrigins = [
 
 app.use(cors({
   origin: (origin, callback) => {
-    // Permitir solicitudes sin origen (como Postman o curl)
+    // Permitir solicitudes sin origen (Postman, curl, etc.)
     if (!origin) return callback(null, true);
     if (allowedOrigins.includes(origin)) return callback(null, true);
     return callback(new Error(`CORS blocked from origin: ${origin}`));
@@ -32,6 +32,11 @@ app.use(cors({
 // ✅ Middlewares
 app.use(express.json());
 app.use(morgan('dev'));
+
+// ✅ Ruta raíz para Render (Health Check)
+app.get('/', (_req, res) => {
+  res.send('mysimo backend is running ✅');
+});
 
 // ✅ Endpoint de salud
 app.get('/api/health', (_req, res) => {
@@ -53,12 +58,14 @@ app.use((req, res) => {
 // ✅ Manejador de errores
 app.use((err, _req, res, _next) => {
   console.error(err);
-  res.status(err.status || 500).json({ error: err.message || 'Internal Server Error' });
+  res.status(err.status || 500).json({
+    error: err.message || 'Internal Server Error'
+  });
 });
 
 // ✅ Iniciar servidor
 app.listen(port, () => {
-  console.log(`mysimo backend running on port ${port}`);
+  console.log(`✅ mysimo backend running on port ${port}`);
 });
 
 
