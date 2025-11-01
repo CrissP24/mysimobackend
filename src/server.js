@@ -13,34 +13,52 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 4000;
 
-const corsOrigins = (process.env.CORS_ORIGINS || '').split(',').map(s => s.trim()).filter(Boolean);
-app.use(cors({ origin: corsOrigins.length ? corsOrigins : '*', credentials: true }));
+// ✅ Configuración CORS explícita (Frontend + Local)
+const allowedOrigins = [
+  'https://mysimofrontend.vercel.app',
+  'http://localhost:5173'
+];
+
+app.use(cors({
+  origin: (origin, callback) => {
+    // Permitir solicitudes sin origen (como Postman o curl)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    return callback(new Error(`CORS blocked from origin: ${origin}`));
+  },
+  credentials: true,
+}));
+
+// ✅ Middlewares
 app.use(express.json());
 app.use(morgan('dev'));
 
+// ✅ Endpoint de salud
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', name: 'mysimo-api' });
 });
 
+// ✅ Rutas API
 app.use('/api/auth', authRoutes);
 app.use('/api/doctors', doctorRoutes);
 app.use('/api', metaRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/chat', chatRoutes);
 
-// 404
+// ✅ 404
 app.use((req, res) => {
   res.status(404).json({ error: 'Not Found', path: req.path });
 });
 
-// Error handler
-// eslint-disable-next-line no-unused-vars
+// ✅ Manejador de errores
 app.use((err, _req, res, _next) => {
   console.error(err);
   res.status(err.status || 500).json({ error: err.message || 'Internal Server Error' });
 });
 
+// ✅ Iniciar servidor
 app.listen(port, () => {
   console.log(`mysimo backend running on port ${port}`);
 });
+
 
