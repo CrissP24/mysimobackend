@@ -4,7 +4,6 @@
   "private": true,
   "type": "module",
   "scripts": {
-  "postinstall": "npx prisma generate",
   "build": "npx prisma generate",
   "start": "node src/server.js"
 },
