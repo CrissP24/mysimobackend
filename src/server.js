@@ -18,7 +18,6 @@ const allowedOrigins = [
   'https://consultamedica.ec',
   'https://www.consultamedica.ec',
   'https://mysimofrontend.vercel.app',
-  'http://localhost:5173'
 ];
 
 app.use(cors({
