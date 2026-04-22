@@ -15,6 +15,8 @@ const port = process.env.PORT || 4000;
 
 // ✅ Configuración CORS explícita (Frontend + Local)
 const allowedOrigins = [
+  'https://consultamedica.ec',
+  'https://www.consultamedica.ec',
   'https://mysimofrontend.vercel.app',
   'http://localhost:5173'
 ];

@@ -73,3 +73,40 @@ export async function login(req, res) {
   }
 }
 
+export async function googleLogin(req, res) {
+  try {
+    const { credential } = req.body;
+    if (!credential) return res.status(400).json({ error: 'Credential de Google requerido' });
+
+    // Verificar el id_token con Google
+    const googleRes = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${credential}`);
+    if (!googleRes.ok) return res.status(401).json({ error: 'Token de Google inválido' });
+
+    const { email, name, picture, sub: googleId } = await googleRes.json();
+    if (!email) return res.status(400).json({ error: 'No se pudo obtener email de Google' });
+
+    // Buscar o crear usuario
+    let user = await prisma.user.findUnique({ where: { email } });
+
+    if (!user) {
+      // Crear usuario nuevo con contraseña aleatoria (inutilizable)
+      const randomHash = await bcrypt.hash(uuidv4(), 10);
+      user = await prisma.user.create({
+        data: {
+          id: uuidv4(),
+          name: name || email.split('@')[0],
+          email,
+          passwordHash: randomHash,
+          role: 'patient',
+        }
+      });
+    }
+
+    const token = signToken(user);
+    return res.json({ user: { id: user.id, name: user.name, email: user.email, role: user.role }, token });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ error: 'Error en login con Google' });
+  }
+}
+
